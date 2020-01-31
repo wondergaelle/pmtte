@@ -45,6 +45,11 @@ export default class Round {
             }
         }
 
+        if (!this.players[this.currentPlayer].canPlay) {
+            this.endTurn();
+            return;
+        }
+
         this.players[this.currentPlayer].elPush.addEventListener('mouseup', this.endTurn.bind(this));
     }
 
@@ -81,10 +86,41 @@ export default class Round {
 
             winner.animate('bounce', '1s', 'linear', '0s', 'infinite');
 
-            for (let player = 0; player < this.players.length; ++player) {
-                if (this.players[player] !== winner) {
-                    this.players[player].animate('fadeOutDown', '1s', 'linear', '0s', '1', 'normal', 'forwards');
+            function compare(a, b) {
+                // Use toUpperCase() to ignore character casing
+                const scoreA = a.score;
+                const scoreB = b.score;
+
+                let comparison = 0;
+                if (scoreA < scoreB) {
+                    comparison = 1;
+                } else if (scoreA > scoreB) {
+                    comparison = -1;
                 }
+                return comparison;
+            }
+
+            let ranking = this.players.sort(compare);
+            console.log(ranking);
+            for (let rank = 0; rank < ranking.length; ++rank) {
+                let suffix = '';
+
+                switch (rank) {
+                    case 0:
+                        suffix = 'st';
+                        break;
+                    case 1:
+                        suffix = 'nd';
+                        break;
+                    case 2:
+                        suffix = 'rd';
+                        break;
+                    case 3:
+                        suffix = 'th';
+                        break;
+                }
+
+                ranking[rank].elScore.parentNode.innerHTML = (rank + 1) + suffix;
             }
 
             this.elConsole.querySelector('.reload').addEventListener('click', function () {
@@ -100,7 +136,7 @@ export default class Round {
                 toastr.clear();
 
                 // Ajoute un buff ou un debuff sur chaque joueur
-                for (let player = 0; player < self.players.length; ++player){
+                for (let player = 0; player < self.players.length; ++player) {
                     console.log('player buff : ' + player);
                     let currentBuff = Math.round(Math.random() * (buffs.length - 1));
                     self.players[player].buff = buffs[currentBuff];
