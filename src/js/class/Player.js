@@ -1,4 +1,5 @@
 import toastr from 'toastr';
+import { sounds } from '../data/sounds'
 
 export default class {
     constructor(name, elCard) {
@@ -12,7 +13,7 @@ export default class {
         this.frameRate = 24;
         this.buff = null;
         this.multiplicator = 1;
-        this.additionator = 0;
+        this.canPlay = true;
     }
 
     // Génère le code html d'un Player
@@ -24,6 +25,7 @@ export default class {
         this.elCard.innerHTML += '<div class="loader"><div class="load"><div class="currentTime">0</div></div></div>';
         this.elCard.innerHTML += '<button class="push btn btn--bordered" style="display: none;">Push and hold me!</button>';
         this.elCard.innerHTML += '<div>Score: <span class="score">' + this.score + 'pts</span></div>';
+        this.elCard.innerHTML += '<div class="scoreLoad"></div>';
 
 
         // On stocke les nouveaux éléments HTML dans des propriétés de l'objet pour pouvoir jouer avec par la suite
@@ -33,6 +35,7 @@ export default class {
         this.elCurrentTime = this.elCard.querySelector('.currentTime');
         this.elPush = this.elCard.querySelector('.push');
         this.elScore = this.elCard.querySelector('.score');
+        this.elScoreLoad = this.elCard.querySelector('.scoreLoad');
 
         this.elPush.addEventListener('mousedown', this.push.bind(this));
         this.elPush.addEventListener('mouseup', this.release.bind(this));
@@ -55,8 +58,8 @@ export default class {
             fTimingFunction = timingFunction || 'linear',
             fDelay = delay || '0s',
             fIterationCount = iterationCount || '1',
-            fDirection = direction || 'forwards',
-            fFillMode = fillMode || 'normal';
+            fDirection = direction || 'normal',
+            fFillMode = fillMode || 'both';
 
         this.elCard.style.animation = fName + ' ' + fDuration + ' ' + fTimingFunction + ' ' + fDelay + ' ' + fIterationCount + ' ' + fDirection + ' ' + fFillMode;
     }
@@ -84,7 +87,8 @@ export default class {
 
         if (this.currentTime > this.time) {
             toastr.info('Too far!');
-        } else {
+        }
+        else {
             toastr.info('You won but you could\'ve stand ' + (Math.round((this.time - this.currentTime) * 100) / 100) + ' more seconds !');
         }
 
@@ -101,12 +105,15 @@ export default class {
             if (this.currentTime > this.time) {
                 roundScore = this.score / -2;
                 this.animate();
-            } else {
+            }
+            else {
                 if (this.currentTime === this.time) {
                     roundScore = 200;
                     toastr.info('P.E.R.F.E.C.T.!');
+                    sounds.perfect.play();
                     this.animate('bounce');
-                } else {
+                }
+                else {
                     let loadHeight = parseInt(this.elLoad.offsetHeight);
                     let loaderHeight = parseInt(this.elLoader.offsetHeight);
                     let x = (loadHeight - (loaderHeight / 2)) / (loaderHeight / 2) * 100;
@@ -120,10 +127,14 @@ export default class {
         this.score += roundScore * this.multiplicator;
         this.score = Math.round(this.score);
 
-        this.score += roundScore + this.additionator;
-        this.score = Math.round(this.score);
-
         this.render();
+    }
+
+    // Calcul la hauteur de la barre de score en fonction de la taille de la carte et des points maximum
+    pointsLoad(maxScore) {
+        this.maxScore = maxScore;
+
+        this.elScoreLoad.style.minHeight = (this.elCard.offsetHeight / maxScore * this.score) + 'px';
     }
 
     // Définit le temps max pour chaque player par tour
@@ -154,18 +165,25 @@ export default class {
                 break;
 
             case 4:
-                this.additionator += 50;
+                this.score += 50;
+                this.pointsLoad(this.maxScore);
                 break;
 
             case 5:
-                this.additionator -= 50;
+                this.score -= 50;
+                this.pointsLoad(this.maxScore);
+                break;
+
+            case 6:
+                this.canPlay = false;
                 break;
         }
 
         if (this.buff.bonus) {
-            toastr.success('You got a buff!', this.buff.infos, {timeOut: 120000});
-        } else {
-            toastr.error('You got a debuff!', this.buff.infos, {timeOut: 120000});
+            toastr.success('You got a buff!', this.buff.infos, { timeOut: 120000 });
+        }
+        else {
+            toastr.error('You got a debuff!', this.buff.infos, { timeOut: 120000 });
         }
 
         this.render();
@@ -176,7 +194,7 @@ export default class {
         this.currentTime = 0;
         this.elLoad.style.height = 0;
         this.multiplicator = 1;
-        this.additionator= 0;
+        this.canPlay = true;
         this.animate('none');
         this.render();
     }

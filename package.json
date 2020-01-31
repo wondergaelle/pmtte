@@ -29,7 +29,8 @@
     "build-copy": {
       "patterns": [
         "src/fonts",
-        "src/favicon"
+        "src/favicon",
+        "src/sounds"
       ],
       "extensions": "*",
       "quiet": false
@@ -46,7 +47,7 @@
     "watch-js": "npm-watch build-js",
     "build-img": "imagemin src/img/*.{png,jpg,jpeg,gif} --out-dir=dist/img",
     "watch-img": "npm-watch build-img",
-    "build-copy": "copyfiles -u 1 src/fonts/* src/favicon/* dist",
+    "build-copy": "copyfiles -u 1 src/fonts/* src/favicon/* src/sounds/* dist",
     "watch-copy": "npm-watch build-copy",
     "watch": "run-p watch-*",
     "build": "run-s clear build-*",

@@ -22,11 +22,16 @@ export let buffs = [
     {
         id: 4,
         bonus: true,
-        infos: 'you win  50 points !!! '
+        infos: 'You lucky little bastard, take this 5Opts'
     },
     {
         id: 5,
         bonus: false,
-        infos: 'you loose 50 points...'
+        infos: 'Sorry mate, you loose 50pts.'
+    },
+    {
+        id: 6,
+        bonus: false,
+        infos: 'Pass your turn dickhead!'
     }
 ];
